@@ -11,7 +11,7 @@ claude plugin add django-claude-kont
 Ou instale pelo GitHub:
 
 ```bash
-claude plugin add github:lucasviana/django-claude-kont
+claude plugin add github:lucasviana78/django-claude-kont
 ```
 
 ## O que está incluído
