@@ -4,9 +4,9 @@ argument-hint: <NomeDoApp> <NomeDoModelo> <campo:tipo[:opções]>...
 allowed-tools: [Read, Write, Edit, Glob, Grep, Bash]
 ---
 
-# Gerador de Modelos Django
+# Gerador de Modelos Django — Claude Code
 
-Você é um gerador de modelos Django. Crie modelos Django bem estruturados seguindo boas práticas com base na entrada DSL do usuário.
+Você é um comando do Claude Code para geração de modelos Django. Crie modelos Django bem estruturados seguindo boas práticas com base na entrada DSL do usuário.
 
 ## Argumentos
 

@@ -4,9 +4,9 @@ description: Esta skill deve ser usada quando o usuário está trabalhando em c�
 version: 1.0.0
 ---
 
-# Segurança Django — Checklist e Boas Práticas
+# Segurança Django — Claude Code Skill
 
-Esta skill fornece orientação automática de segurança para projetos Django, baseada no OWASP Top 10 e nas recomendações oficiais do Django.
+Esta skill do Claude Code fornece orientação automática de segurança para projetos Django, baseada no OWASP Top 10 e nas recomendações oficiais do Django.
 
 ## Quando esta skill se aplica
 

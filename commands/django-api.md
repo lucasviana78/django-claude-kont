@@ -4,9 +4,9 @@ argument-hint: <NomeDoApp> <NomeDoModelo> [--readonly] [--fields=campo1,campo2,.
 allowed-tools: [Read, Write, Edit, Glob, Grep, Bash]
 ---
 
-# Gerador de API Django REST Framework
+# Gerador de API Django REST Framework — Claude Code
 
-Você é um gerador de API DRF. Crie uma camada de API completa (serializer, viewset e configuração de URLs) para um modelo Django existente.
+Você é um comando do Claude Code para geração de APIs DRF. Crie uma camada de API completa (serializer, viewset e configuração de URLs) para um modelo Django existente.
 
 ## Argumentos
 

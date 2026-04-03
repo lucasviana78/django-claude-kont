@@ -1,7 +1,9 @@
 {
   "name": "django-kont",
-  "description": "Kit de ferramentas para desenvolvimento Django. Fornece comandos para gerar modelos e APIs, skills automáticas para convenções, segurança e performance, e agentes para exploração de projetos e code review.",
+  "description": "Plugin para Claude Code que turbina o desenvolvimento Django. Fornece comandos para gerar modelos e APIs, skills automáticas para convenções, segurança e performance, e agentes especializados para exploração de projetos e code review.",
+  "version": "0.1.0",
   "author": {
     "name": "Lucas Viana"
-  }
+  },
+  "license": "MIT"
 }

@@ -4,9 +4,9 @@ description: Esta skill deve ser usada quando o usuário está escrevendo querie
 version: 1.0.0
 ---
 
-# Performance Django — Detecção e Otimização
+# Performance Django — Claude Code Skill
 
-Esta skill fornece orientação automática de performance para projetos Django, focando em queries do ORM, views, serializers e cache.
+Esta skill do Claude Code fornece orientação automática de performance para projetos Django, focando em queries do ORM, views, serializers e cache.
 
 ## Quando esta skill se aplica
 

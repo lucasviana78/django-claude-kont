@@ -1,6 +1,8 @@
-# django-kont
+# django-kont — Plugin para Claude Code
 
-Plugin que turbina o desenvolvimento Django com comandos inteligentes, skills automáticas de boas práticas e agentes especializados.
+Plugin para **Claude Code** que turbina o desenvolvimento Django com comandos inteligentes, skills automáticas de boas práticas e agentes especializados.
+
+Transforma conhecimento recorrente de Django em ferramentas operacionais do Claude Code — reduzindo prompt manual e padronizando a geração e análise de código.
 
 ## Instalação
 
@@ -8,18 +10,20 @@ Plugin que turbina o desenvolvimento Django com comandos inteligentes, skills au
 claude plugin add github:lucasviana78/django-claude-kont
 ```
 
+> Requer [Claude Code](https://docs.anthropic.com/en/docs/claude-code) instalado.
+
 ## O que está incluído
 
-### Comandos (invocados pelo usuário)
+### Comandos (invocados pelo usuário no Claude Code)
 
 | Comando | Descrição |
 |---------|-----------|
 | `/django-model` | Gera modelos Django a partir de uma sintaxe DSL simples |
 | `/django-api` | Gera uma API DRF completa (Serializer + ViewSet + URLs) para um modelo |
 
-### Skills (automáticas)
+### Skills (ativadas automaticamente pelo Claude Code)
 
-Skills são ativadas automaticamente quando o contexto relevante é detectado no seu projeto Django.
+Skills são ativadas automaticamente pelo Claude Code quando o contexto relevante é detectado no seu projeto Django.
 
 | Skill | Ativa quando |
 |-------|-------------|
@@ -27,7 +31,7 @@ Skills são ativadas automaticamente quando o contexto relevante é detectado no
 | `django-security` | Mexendo em autenticação, formulários, queries — verifica OWASP e diretrizes de segurança Django |
 | `django-performance` | Escrevendo queries ou views — detecta N+1, sugere otimizações |
 
-### Agentes
+### Agentes (Claude Code agents)
 
 | Agente | Propósito |
 |--------|-----------|
@@ -42,7 +46,7 @@ Skills são ativadas automaticamente quando o contexto relevante é detectado no
 | Django | 4.2 LTS, 5.0, 5.1, 5.2 |
 | Django REST Framework | 3.14, 3.15 |
 
-> O plugin gera código compatível com essas versões. Versões anteriores podem funcionar mas não são validadas.
+> O plugin instrui o Claude Code a gerar código compatível com essas versões. Versões anteriores podem funcionar mas não são validadas.
 
 ## Exemplos de uso
 
@@ -173,27 +177,27 @@ urlpatterns = [
 
 ### Explorar um projeto
 
-Peça para explorar seu projeto:
+Peça ao Claude Code para explorar seu projeto:
 
 ```
 Explore this Django project and map out the architecture
 ```
 
-O agente `django-explorer` será usado automaticamente para mapear apps, models, views, URLs, signals e retornar um relatório estruturado.
+O Claude Code ativa automaticamente o agente `django-explorer` para mapear apps, models, views, URLs, signals e retornar um relatório estruturado.
 
 ### Revisar código
 
-Peça uma revisão de código:
+Peça ao Claude Code uma revisão de código:
 
 ```
 Review my Django code for best practices
 ```
 
-O agente `django-reviewer` analisa o código com foco em qualidade, segurança, performance e consistência.
+O Claude Code ativa o agente `django-reviewer`, que analisa o código com foco em qualidade, segurança, performance e consistência.
 
 ## Convenções aplicadas
 
-A skill `django-conventions` guia automaticamente o desenvolvimento para seguir:
+A skill `django-conventions` guia automaticamente o Claude Code para seguir:
 
 - **Estrutura do projeto**: Organização adequada de apps com services, managers, selectors
 - **Padrões de modelo**: Ordenação de campos, convenções de nomenclatura, classe Meta, `__str__`
@@ -202,13 +206,19 @@ A skill `django-conventions` guia automaticamente o desenvolvimento para seguir:
 - **Testes**: pytest-django, factory_boy, nomenclatura adequada
 - **Segurança**: CSRF, ORM em vez de SQL bruto, configurações de autenticação adequadas
 
+## Como funciona
+
+Este plugin adiciona **comandos**, **skills** e **agentes** ao Claude Code via o sistema de plugins. Quando instalado:
+
+- **Comandos** ficam disponíveis como `/django-model` e `/django-api` no Claude Code
+- **Skills** são ativadas automaticamente quando o Claude Code detecta que você está trabalhando em código Django relevante (autenticação, queries, models, etc.)
+- **Agentes** são invocados pelo Claude Code quando você pede para explorar ou revisar seu projeto
+
+Nenhuma dependência Python é instalada — o plugin opera inteiramente no nível do Claude Code.
+
 ## Roadmap
 
 - [ ] `/django-startproject` — Criar um novo projeto com estrutura de boas práticas
 - [ ] `/django-startapp` — Criar um novo app com boilerplate completo
 - [ ] `/django-test` — Gerar ou executar testes para models/views/APIs
 - [ ] `/django-migrate` — Fluxo de migração seguro com verificações
-
-## Contribuição
-
-Contribuições são bem-vindas! Abra uma issue ou PR.

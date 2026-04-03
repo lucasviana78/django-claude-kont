@@ -4,9 +4,9 @@ description: Esta skill deve ser usada quando o usuário está trabalhando em um
 version: 1.0.0
 ---
 
-# Convenções e boas práticas Django
+# Convenções e boas práticas Django — Claude Code Skill
 
-Esta skill fornece orientação automática para desenvolvimento Django, garantindo que o código siga as boas práticas da comunidade e a filosofia de design do Django.
+Esta skill do Claude Code fornece orientação automática para desenvolvimento Django, garantindo que o código gerado ou modificado pelo Claude Code siga as boas práticas da comunidade e a filosofia de design do Django.
 
 ## Quando esta skill se aplica
 

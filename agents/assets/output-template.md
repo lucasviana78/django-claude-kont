@@ -1,4 +1,4 @@
-# Template de saída — Django Explorer
+# Template de saída — Django Explorer (Claude Code Agent)
 
 Use exatamente esta estrutura. Preencha os dados, remova seções que não se aplicam (ex: DRF em projeto sem DRF). Não adicione seções extras.
 
