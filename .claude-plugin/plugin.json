@@ -1,6 +1,6 @@
 {
-  "name": "django-claude-kont",
-  "description": "Kit de ferramentas para desenvolvimento Django no Claude Code. Fornece comandos para gerar modelos, APIs e testes, além de skills automáticas para convenções, segurança e boas práticas de performance.",
+  "name": "django-kont",
+  "description": "Kit de ferramentas para desenvolvimento Django. Fornece comandos para gerar modelos e APIs, skills automáticas para convenções, segurança e performance, e agentes para exploração de projetos e code review.",
   "author": {
     "name": "Lucas Viana"
   }

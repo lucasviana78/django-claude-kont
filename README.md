@@ -1,14 +1,8 @@
-# django-claude-kont
+# django-kont
 
-Um plugin do Claude Code que turbina o desenvolvimento Django com comandos inteligentes, skills automáticas de boas práticas e agentes especializados.
+Plugin que turbina o desenvolvimento Django com comandos inteligentes, skills automáticas de boas práticas e agentes especializados.
 
 ## Instalação
-
-```bash
-claude plugin add django-claude-kont
-```
-
-Ou instale pelo GitHub:
 
 ```bash
 claude plugin add github:lucasviana78/django-claude-kont
@@ -25,7 +19,7 @@ claude plugin add github:lucasviana78/django-claude-kont
 
 ### Skills (automáticas)
 
-Skills são ativadas automaticamente quando o Claude detecta contexto relevante no seu projeto Django.
+Skills são ativadas automaticamente quando o contexto relevante é detectado no seu projeto Django.
 
 | Skill | Ativa quando |
 |-------|-------------|
@@ -33,25 +27,60 @@ Skills são ativadas automaticamente quando o Claude detecta contexto relevante 
 | `django-security` | Mexendo em autenticação, formulários, queries — verifica OWASP e diretrizes de segurança Django |
 | `django-performance` | Escrevendo queries ou views — detecta N+1, sugere otimizações |
 
-### Agentes (criados pelo Claude)
+### Agentes
 
 | Agente | Propósito |
 |--------|-----------|
 | `django-explorer` | Mapeia um projeto Django existente (models, views, URLs, signals) |
-| `django-reviewer` | Revisa código com foco em boas práticas Django |
+| `django-reviewer` | Revisa código com foco em boas práticas, segurança e performance Django |
+
+## Compatibilidade
+
+| Dependência | Versões suportadas |
+|-------------|-------------------|
+| Python | 3.10, 3.11, 3.12, 3.13 |
+| Django | 4.2 LTS, 5.0, 5.1, 5.2 |
+| Django REST Framework | 3.14, 3.15 |
+
+> O plugin gera código compatível com essas versões. Versões anteriores podem funcionar mas não são validadas.
 
 ## Exemplos de uso
 
 ### Gerar um modelo
 
+**Entrada:**
 ```
 /django-model blog Post title:str body:text slug:slug! author:fk:User published:bool published_at:datetime?
 ```
 
-Isso cria um modelo `Post` em `blog/models.py` com:
-- Todos os campos especificados com os tipos de campo Django apropriados
-- Timestamps `created_at` / `updated_at`
-- Classe `Meta`, `__str__`, e `related_name` nas FKs
+**Saída gerada em `blog/models.py`:**
+```python
+from django.conf import settings
+from django.db import models
+
+
+class Post(models.Model):
+    title = models.CharField(max_length=255)
+    body = models.TextField()
+    slug = models.SlugField(unique=True)
+    published = models.BooleanField(default=False)
+    published_at = models.DateTimeField(null=True, blank=True)
+    author = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="posts",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "post"
+        verbose_name_plural = "posts"
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return self.title
+```
 
 #### Tipos de campo da DSL
 
@@ -81,29 +110,90 @@ Isso cria um modelo `Post` em `blog/models.py` com:
 
 ### Gerar uma API
 
+**Entrada:**
 ```
 /django-api blog Post --filter=published,author --search=title,body --order=created_at
 ```
 
-Isso gera:
-- `blog/serializers.py` — `PostSerializer` com campos somente leitura apropriados
-- `blog/viewsets.py` — `PostViewSet` com filtragem, busca, ordenação
-- `blog/urls.py` — Configuração do Router
-- Verifica se `rest_framework` está em `INSTALLED_APPS`
+**Saída gerada:**
+
+`blog/serializers.py`:
+```python
+from rest_framework import serializers
+
+from .models import Post
+
+
+class PostSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Post
+        fields = "__all__"
+        read_only_fields = ["id", "created_at", "updated_at"]
+```
+
+`blog/viewsets.py`:
+```python
+from rest_framework import viewsets
+from rest_framework.permissions import IsAuthenticated
+
+from .models import Post
+from .serializers import PostSerializer
+
+
+class PostViewSet(viewsets.ModelViewSet):
+    queryset = Post.objects.select_related("author").all()
+    serializer_class = PostSerializer
+    permission_classes = [IsAuthenticated]
+    filterset_fields = ["published", "author"]
+    search_fields = ["title", "body"]
+    ordering_fields = ["created_at"]
+    ordering = ["-created_at"]
+    lookup_field = "slug"
+
+    def perform_create(self, serializer):
+        serializer.save(author=self.request.user)
+```
+
+`blog/urls.py`:
+```python
+from django.urls import include, path
+from rest_framework.routers import DefaultRouter
+
+from .viewsets import PostViewSet
+
+router = DefaultRouter()
+router.register("posts", PostViewSet)
+
+app_name = "blog"
+
+urlpatterns = [
+    path("", include(router.urls)),
+]
+```
 
 ### Explorar um projeto
 
-Basta pedir ao Claude para explorar seu projeto:
+Peça para explorar seu projeto:
 
 ```
 Explore this Django project and map out the architecture
 ```
 
-O Claude usará automaticamente o agente `django-explorer`.
+O agente `django-explorer` será usado automaticamente para mapear apps, models, views, URLs, signals e retornar um relatório estruturado.
+
+### Revisar código
+
+Peça uma revisão de código:
+
+```
+Review my Django code for best practices
+```
+
+O agente `django-reviewer` analisa o código com foco em qualidade, segurança, performance e consistência.
 
 ## Convenções aplicadas
 
-A skill `django-conventions` guia automaticamente o Claude a seguir:
+A skill `django-conventions` guia automaticamente o desenvolvimento para seguir:
 
 - **Estrutura do projeto**: Organização adequada de apps com services, managers, selectors
 - **Padrões de modelo**: Ordenação de campos, convenções de nomenclatura, classe Meta, `__str__`
@@ -118,9 +208,6 @@ A skill `django-conventions` guia automaticamente o Claude a seguir:
 - [ ] `/django-startapp` — Criar um novo app com boilerplate completo
 - [ ] `/django-test` — Gerar ou executar testes para models/views/APIs
 - [ ] `/django-migrate` — Fluxo de migração seguro com verificações
-- [ ] Skill `django-security` — Checklist OWASP + segurança Django
-- [ ] Skill `django-performance` — Detecção de N+1, otimização de queries
-- [ ] Agente `django-reviewer` — Revisão de código com foco em Django
 
 ## Contribuição
 
