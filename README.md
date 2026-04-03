@@ -1,8 +1,8 @@
-# django-kont — Plugin para Claude Code
+# django-kont | Plugin para Claude Code
 
 Plugin para **Claude Code** que turbina o desenvolvimento Django com comandos inteligentes, skills automáticas de boas práticas e agentes especializados.
 
-Transforma conhecimento recorrente de Django em ferramentas operacionais do Claude Code — reduzindo prompt manual e padronizando a geração e análise de código.
+Transforma conhecimento recorrente de Django em ferramentas operacionais do Claude Code, reduzindo prompt manual e padronizando a geração e análise de código.
 
 ## Instalação
 
@@ -27,9 +27,9 @@ Skills são ativadas automaticamente pelo Claude Code quando o contexto relevant
 
 | Skill | Ativa quando |
 |-------|-------------|
-| `django-conventions` | Trabalhando em qualquer código Django — fornece convenções e boas práticas |
-| `django-security` | Mexendo em autenticação, formulários, queries — verifica OWASP e diretrizes de segurança Django |
-| `django-performance` | Escrevendo queries ou views — detecta N+1, sugere otimizações |
+| `django-conventions` | Trabalhando em qualquer código Django. Fornece convenções e boas práticas |
+| `django-security` | Mexendo em autenticação, formulários, queries. Verifica OWASP e diretrizes de segurança Django |
+| `django-performance` | Escrevendo queries ou views. Detecta N+1, sugere otimizações |
 
 ### Agentes (Claude Code agents)
 
@@ -47,6 +47,162 @@ Skills são ativadas automaticamente pelo Claude Code quando o contexto relevant
 | Django REST Framework | 3.14, 3.15 |
 
 > O plugin instrui o Claude Code a gerar código compatível com essas versões. Versões anteriores podem funcionar mas não são validadas.
+
+## Before / After
+
+Exemplos reais do que o plugin gera, comparando código escrito manualmente com o resultado dos comandos.
+
+### Modelo: sem plugin vs com plugin
+
+**Sem plugin**, o que um dev costuma escrever rápido:
+
+```python
+from django.db import models
+
+
+class Product(models.Model):
+    name = models.CharField(max_length=100)
+    description = models.TextField()
+    price = models.DecimalField(max_digits=10, decimal_places=2)
+    category = models.ForeignKey("Category", on_delete=models.CASCADE)
+    is_active = models.BooleanField(default=True)
+```
+
+Problemas comuns nesse código:
+- sem `related_name` no ForeignKey
+- sem `created_at` / `updated_at`
+- sem `class Meta` (verbose_name, ordering)
+- sem `__str__`
+- sem `db_index` em campos filtráveis
+
+**Com plugin** `/django-model catalog Product name:str description:text price:decimal is_active:bool category:fk:Category`:
+
+```python
+from django.db import models
+
+
+class Product(models.Model):
+    name = models.CharField(max_length=255)
+    description = models.TextField()
+    price = models.DecimalField(max_digits=10, decimal_places=2)
+    is_active = models.BooleanField(default=False)
+    category = models.ForeignKey(
+        "Category",
+        on_delete=models.CASCADE,
+        related_name="products",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "product"
+        verbose_name_plural = "products"
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return self.name
+```
+
+### API: sem plugin vs com plugin
+
+**Sem plugin**, serializer e view escritos na pressa:
+
+```python
+# catalog/serializers.py
+from rest_framework import serializers
+from .models import Product
+
+
+class ProductSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Product
+        fields = "__all__"
+
+
+# catalog/views.py
+from rest_framework import viewsets
+from .models import Product
+from .serializers import ProductSerializer
+
+
+class ProductViewSet(viewsets.ModelViewSet):
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
+```
+
+Problemas comuns:
+- sem `read_only_fields`, então `id`, `created_at`, `updated_at` ficam editáveis
+- sem `select_related`, causando N+1 no campo `category`
+- sem `permission_classes`, endpoint aberto
+- sem filtro, busca ou ordenação
+- sem `perform_create` para campos de autor
+
+**Com plugin** `/django-api catalog Product --filter=category,is_active --search=name,description --order=price,created_at`:
+
+```python
+# catalog/serializers.py
+from rest_framework import serializers
+
+from .models import Product
+
+
+class ProductSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Product
+        fields = "__all__"
+        read_only_fields = ["id", "created_at", "updated_at"]
+
+
+# catalog/viewsets.py
+from rest_framework import viewsets
+from rest_framework.permissions import IsAuthenticated
+
+from .models import Product
+from .serializers import ProductSerializer
+
+
+class ProductViewSet(viewsets.ModelViewSet):
+    queryset = Product.objects.select_related("category").all()
+    serializer_class = ProductSerializer
+    permission_classes = [IsAuthenticated]
+    filterset_fields = ["category", "is_active"]
+    search_fields = ["name", "description"]
+    ordering_fields = ["price", "created_at"]
+    ordering = ["-created_at"]
+
+
+# catalog/urls.py
+from django.urls import include, path
+from rest_framework.routers import DefaultRouter
+
+from .viewsets import ProductViewSet
+
+router = DefaultRouter()
+router.register("products", ProductViewSet)
+
+app_name = "catalog"
+
+urlpatterns = [
+    path("", include(router.urls)),
+]
+```
+
+### Review: sem plugin vs com plugin
+
+**Sem plugin**, o dev precisa lembrar de cabeça o que verificar.
+
+**Com plugin**, basta pedir `Review my Django code for best practices` e o agente `django-reviewer` analisa automaticamente:
+
+| Severidade | Achado |
+|------------|--------|
+| High | N+1 query em `ProductViewSet`, falta `select_related("category")` |
+| Medium | `ProductSerializer` sem `read_only_fields`, campos de auditoria editáveis |
+| Medium | `ProductViewSet` sem `permission_classes`, endpoint aberto |
+| Low | Model `Product` sem `class Meta`, falta ordering e verbose_name |
+
+O reviewer entrega a lista priorizada com a correção sugerida para cada item.
+
+---
 
 ## Exemplos de uso
 
@@ -214,11 +370,11 @@ Este plugin adiciona **comandos**, **skills** e **agentes** ao Claude Code via o
 - **Skills** são ativadas automaticamente quando o Claude Code detecta que você está trabalhando em código Django relevante (autenticação, queries, models, etc.)
 - **Agentes** são invocados pelo Claude Code quando você pede para explorar ou revisar seu projeto
 
-Nenhuma dependência Python é instalada — o plugin opera inteiramente no nível do Claude Code.
+Nenhuma dependência Python é instalada. O plugin opera inteiramente no nível do Claude Code.
 
 ## Roadmap
 
-- [ ] `/django-startproject` — Criar um novo projeto com estrutura de boas práticas
-- [ ] `/django-startapp` — Criar um novo app com boilerplate completo
-- [ ] `/django-test` — Gerar ou executar testes para models/views/APIs
-- [ ] `/django-migrate` — Fluxo de migração seguro com verificações
+- [ ] `/django-startproject` Criar um novo projeto com estrutura de boas práticas
+- [ ] `/django-startapp` Criar um novo app com boilerplate completo
+- [ ] `/django-test` Gerar ou executar testes para models/views/APIs
+- [ ] `/django-migrate` Fluxo de migração seguro com verificações
